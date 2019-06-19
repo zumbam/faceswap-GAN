@@ -8,10 +8,11 @@ import glob
 import time
 import numpy as np
 from pathlib import PurePath, Path
-from IPython.display import clear_output
 
 import matplotlib.pyplot as plt
 
+
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 #K.set_learning_phase(1)
 #K.set_learning_phase(0) # set to 0 in inference phase
@@ -50,6 +51,7 @@ img_dirA = './faceA'
 img_dirB = './faceB'
 img_dirA_bm_eyes = "./binary_masks/faceA_eyes"
 img_dirB_bm_eyes = "./binary_masks/faceB_eyes"
+
 
 # Path to saved model weights
 models_dir = "./models"
@@ -95,7 +97,7 @@ model.build_pl_model(vggface_model=vggface, before_activ=loss_config["PL_before_
 model.build_train_functions(loss_weights=loss_weights, **loss_config)
 
 from data_loader.data_loader import DataLoader
-from utils import showG, showG_mask, showG_eyes
+# from utils import showG, showG_mask, showG_eyes
 
 # Create ./models directory
 Path(f"models").mkdir(parents=True, exist_ok=True)
@@ -133,7 +135,7 @@ train_batchB = DataLoader(train_B, train_AnB, batchSize, img_dirB_bm_eyes,
                           RESOLUTION, num_cpus, K.get_session(), **da_config)
 _, tA, bmA = train_batchA.get_next_batch()
 _, tB, bmB = train_batchB.get_next_batch()
-showG_eyes(tA, tB, bmA, bmB, batchSize)
+# showG_eyes(tA, tB, bmA, bmB, batchSize)
 del train_batchA, train_batchB
 
 def reset_session(save_path):
@@ -177,7 +179,7 @@ display_iters = 300
 backup_iters = 5000
 TOTAL_ITERS = 40000
 
-global train_batchA, train_batchB
+
 train_batchA = DataLoader(train_A, train_AnB, batchSize, img_dirA_bm_eyes,
                           RESOLUTION, num_cpus, K.get_session(), **da_config)
 train_batchB = DataLoader(train_B, train_AnB, batchSize, img_dirB_bm_eyes,
@@ -313,11 +315,11 @@ while gen_iterations <= TOTAL_ITERS:
         wA, tA, _ = train_batchA.get_next_batch()
         wB, tB, _ = train_batchB.get_next_batch()
         print("Transformed (masked) results:")
-        showG(tA, tB, model.path_A, model.path_B, batchSize)
+        #showG(tA, tB, model.path_A, model.path_B, batchSize)
         print("Masks:")
-        showG_mask(tA, tB, model.path_mask_A, model.path_mask_B, batchSize)
+        #showG_mask(tA, tB, model.path_mask_A, model.path_mask_B, batchSize)
         print("Reconstruction results:")
-        showG(wA, wB, model.path_bgr_A, model.path_bgr_B, batchSize)
+        #showG(wA, wB, model.path_bgr_A, model.path_bgr_B, batchSize)
         errGA_sum = errGB_sum = errDA_sum = errDB_sum = 0
         for k in ['ttl', 'adv', 'recon', 'edge', 'pl']:
             errGAs[k] = 0
@@ -336,11 +338,11 @@ while gen_iterations <= TOTAL_ITERS:
     wA, tA, _ = train_batchA.get_next_batch()
     wB, tB, _ = train_batchB.get_next_batch()
     print("Transformed (masked) results:")
-    showG(tA, tB, model.path_A, model.path_B, batchSize)
+    #showG(tA, tB, model.path_A, model.path_B, batchSize)
     print("Masks:")
-    showG_mask(tA, tB, model.path_mask_A, model.path_mask_B, batchSize)
+    #showG_mask(tA, tB, model.path_mask_A, model.path_mask_B, batchSize)
     print("Reconstruction results:")
-    showG(wA, wB, model.path_bgr_A, model.path_bgr_B, batchSize)
+    #showG(wA, wB, model.path_bgr_A, model.path_bgr_B, batchSize)
 
 
 """
