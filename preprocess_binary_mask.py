@@ -6,18 +6,21 @@ from pathlib import PurePath, Path
 from matplotlib import pyplot as plt
 import os
 
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
 dir_faceA = "./faceA"
-dir_faceB = "./faceB"
+dir_faceB = "./filtered_faces"
 dir_bm_faceA_eyes = "./binary_masks/faceA_eyes"
 dir_bm_faceB_eyes = "./binary_masks/faceB_eyes"
 
 fns_faceA = glob(f"{dir_faceA}/*.*")
 fns_faceB = glob(f"{dir_faceB}/*.*")
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, enable_cuda=True, flip_input=False)
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, device='cuda', flip_input=False)
 
-os.makedirs('binary_masks/faceA_eyes', exist_ok=True)
-os.makedirs('binary_masks/faceA_eyes', exist_ok=True)
+os.makedirs(dir_bm_faceA_eyes, exist_ok=True)
+os.makedirs(dir_bm_faceB_eyes, exist_ok=True)
+
 
 fns_face_not_detected = []
 
