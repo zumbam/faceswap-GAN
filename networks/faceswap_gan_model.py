@@ -213,9 +213,13 @@ class FaceswapGANModel():
 
         # The following losses are rather trivial, thus their wegihts are fixed.
         # Cycle consistency loss
+        loss_cycle_GA = 0
+        loss_cycle_GB = 0
         if loss_config['use_cyclic_loss']:
-            loss_GA += 10 * cyclic_loss(self.netGA, self.netGB, self.real_A)
-            loss_GB += 10 * cyclic_loss(self.netGB, self.netGA, self.real_B)
+            loss_cycle_GA = cyclic_loss(self.netGA, self.netGB, self.real_A)
+            loss_cycle_GB = cyclic_loss(self.netGB, self.netGA, self.real_B)
+            loss_GA += loss_cycle_GA
+            loss_GB += loss_cycle_GB
 
         # Alpha mask loss
         if not loss_config['use_mask_hinge_loss']:
@@ -253,14 +257,14 @@ class FaceswapGANModel():
         self.netDA_train = K.function([self.distorted_A, self.real_A],[loss_DA], training_updates)
         training_updates = Adam(lr=self.lrG*loss_config['lr_factor'], beta_1=0.5).get_updates(weightsGA,[], loss_GA)
         self.netGA_train = K.function([self.distorted_A, self.real_A, self.mask_eyes_A], 
-                                      [loss_GA, loss_adv_GA, loss_recon_GA, loss_edge_GA, loss_pl_GA], 
+                                      [loss_GA, loss_adv_GA, loss_recon_GA, loss_edge_GA, loss_pl_GA, loss_cycle_GA], 
                                       training_updates)
 
         training_updates = Adam(lr=self.lrD*loss_config['lr_factor'], beta_1=0.5).get_updates(weightsDB,[],loss_DB)
         self.netDB_train = K.function([self.distorted_B, self.real_B],[loss_DB], training_updates)
         training_updates = Adam(lr=self.lrG*loss_config['lr_factor'], beta_1=0.5).get_updates(weightsGB,[], loss_GB)
         self.netGB_train = K.function([self.distorted_B, self.real_B, self.mask_eyes_B], 
-                                      [loss_GB, loss_adv_GB, loss_recon_GB, loss_edge_GB, loss_pl_GB], 
+                                      [loss_GB, loss_adv_GB, loss_recon_GB, loss_edge_GB, loss_pl_GB, loss_cycle_GB], 
                                       training_updates)
     
     def build_pl_model(self, vggface_model, before_activ=False):

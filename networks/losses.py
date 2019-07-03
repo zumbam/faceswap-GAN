@@ -25,14 +25,15 @@ def calc_loss(pred, target, loss='l2'):
         raise ValueError(f'Recieve an unknown loss type: {loss}.')
     
 def cyclic_loss(netG1, netG2, real1):
-    fake2 = netG2(real1)[-1] # fake2 ABGR
-    fake2_alpha = Lambda(lambda x: x[:,:,:, :1])(fake2)
+    fake2 = netG2(real1) # fake2 ABGR
+    #fake2_alpha = Lambda(lambda x: x[:,:,:, :1])(fake2)
     fake2 = Lambda(lambda x: x[:,:,:, 1:])(fake2) # fake2 BGR
-    cyclic1 = netG1(fake2)[-1] # cyclic1 ABGR
-    cyclic1_alpha = Lambda(lambda x: x[:,:,:, :1])(cyclic1)
+    cyclic1 = netG1(fake2) # cyclic1 ABGR
+    #cyclic1_alpha = Lambda(lambda x: x[:,:,:, :1])(cyclic1)
     cyclic1 = Lambda(lambda x: x[:,:,:, 1:])(cyclic1) # cyclic1 BGR
     loss = calc_loss(cyclic1, real1, loss='l1')
-    loss += 0.1 * calc_loss(cyclic1_alpha, fake2_alpha, loss='l1')
+    # TODO remove if done. Seems the alpha loss penalty creates artifacts (this was maybe a to strong constraint cause masks of faces do differ)
+    #loss += calc_loss(cyclic1_alpha, fake2_alpha, loss='l1')
     return loss
 
 def adversarial_loss(netD, real, fake_abgr, distorted, gan_training="mixup_LSGAN", **weights):   
