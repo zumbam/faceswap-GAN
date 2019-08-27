@@ -213,8 +213,8 @@ class FaceswapGANModel():
 
         # The following losses are rather trivial, thus their wegihts are fixed.
         # Cycle consistency loss
-        loss_cycle_GA = 0
-        loss_cycle_GB = 0
+        loss_cycle_GA = K.zeros(1)
+        loss_cycle_GB = K.zeros(1)
         if loss_config['use_cyclic_loss']:
             loss_cycle_GA = cyclic_loss(self.netGA, self.netGB, self.real_A)
             loss_cycle_GB = cyclic_loss(self.netGB, self.netGA, self.real_B)
@@ -286,13 +286,14 @@ class FaceswapGANModel():
     def load_weights(self, path="./models"):
         try:
             self.encoder.load_weights(f"{path}/encoder.h5")
+            
             self.decoder_A.load_weights(f"{path}/decoder_A.h5")
             self.decoder_B.load_weights(f"{path}/decoder_B.h5")
             self.netDA.load_weights(f"{path}/netDA.h5") 
             self.netDB.load_weights(f"{path}/netDB.h5") 
             print ("Model weights files are successfully loaded.")
-        except:
-            print ("Error occurs during loading weights files.")
+        except Exception as e:
+            print ("Error occurs during loading weights files." + str(e))
             pass
     
     def save_weights(self, path="./models"):
